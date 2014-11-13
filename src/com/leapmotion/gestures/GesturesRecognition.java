@@ -6,6 +6,9 @@ package com.leapmotion.gestures;
 import java.io.IOException;
 
 import com.leapmotion.leap.Controller;
+import com.leapmotion.leap.Frame;
+import com.leapmotion.leap.Gesture;
+import com.leapmotion.leap.HandList;
 import com.leapmotion.leap.Listener;
 
 /**
@@ -29,6 +32,8 @@ public class GesturesRecognition extends Listener{
      */
     public void onConnect(Controller controller) {
         System.out.println("Connected.");
+        controller.enableGesture(Gesture.Type.TYPE_SWIPE);
+        controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
     }
 
     /**
@@ -91,7 +96,13 @@ public class GesturesRecognition extends Listener{
      * A new Frame of tracking data is available.
      */
     public void onFrame(Controller controller) {
-        
+        // Get the most recent frame and report some basic information
+        Frame frame = controller.frame();
+        HandList hands = frame.hands();
+
+        if (!hands.isEmpty()) {
+            
+        }
     }
 
     /**
