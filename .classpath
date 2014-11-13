@@ -6,5 +6,11 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="D:/#lib/java-json.jar"/>
+	<classpathentry kind="lib" path="C:/LeapMotion.v2/LeapDeveloperKit_2.1.4+22333_win/LeapSDK/lib/LeapJava.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/LeapMotion.v2/LeapDeveloperKit_2.1.4+22333_win/LeapSDK/lib/x64"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
