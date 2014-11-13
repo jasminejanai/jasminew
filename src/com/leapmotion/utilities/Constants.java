@@ -25,4 +25,6 @@ public class Constants {
     public static final String LEAP_FINAL_STATE = "3 - Final state";
     public static final String LEAP_UNKNOWN_STATE = "Unknown";
 
+    public static final String SWIPE_LEFT = "Swipe Left";
+    public static final String SWIPE_RIGHT = "Swipe Right";
 }
