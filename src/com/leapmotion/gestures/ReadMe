@@ -1,0 +1,8 @@
+This package contains all functions to recognize 7 following gestures:
+1. Move Up and Down
+2. Move Left and Right
+3. Clockwise
+4. ZoomIn and ZoomOut
+5. Holding (to Copy and Paste)
+6. Wave
+7. Counter-clockwise
