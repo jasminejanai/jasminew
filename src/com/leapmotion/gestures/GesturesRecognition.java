@@ -11,6 +11,7 @@ import com.leapmotion.leap.Listener;
 /**
  * @author Le Hong Quan
  * @version 1.0
+ * @since 13-Nov-2014
  *
  */
 public class GesturesRecognition extends Listener{
