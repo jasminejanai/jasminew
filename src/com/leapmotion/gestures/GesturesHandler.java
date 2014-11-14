@@ -156,6 +156,8 @@ public class GesturesHandler extends Listener {
 
             case TYPE_SWIPE:
                 SwipeGesture swipe = new SwipeGesture(gesture);
+                float lifeTime = swipe.pointable().timeVisible();
+
                 System.out.println("  Swipe id: " + swipe.id()
                       //  + ", start_position: " + swipe.startPosition()
                       //  + ", swipe_state: " + swipe.state()
@@ -176,30 +178,39 @@ public class GesturesHandler extends Listener {
                     xAbs = Math.abs(swipe.direction().getX());
                     yAbs = Math.abs(swipe.direction().getY());
 
+                    System.out.println("time visible: " + lifeTime);
+
                     if (Math.round(handSphereRadius) > Constants.HAND_SPHERE) {
-                        if (xAbs > 0.3) {
-                            if (swipe.direction().getX() < 0) {
-                                System.out.println("Swipe Left.");
+                        if (lifeTime > 0.3) {
+                            System.out.println("Waving.");
 
-                                // Call function to Go Previous
-                                webCtrl.goPrevious(); // TODO
-                            } else {
-                                System.out.println("Swipe Right.");
+                            // Call function to close web browser
+                            webCtrl.closeWebBrowser(); //TODO
+                        } else {
+                            if (xAbs > 0.3) {
+                                if (swipe.direction().getX() < 0) {
+                                    System.out.println("Swipe Left.");
 
-                                // Call function to Go Next
-                                webCtrl.goNext(); // TODO
-                            }
-                        } else if (yAbs > 0.3) {
-                            if (swipe.direction().getY() < 0) {
-                                System.out.println("Swipe Down.");
+                                    // Call function to Go Previous
+                                    webCtrl.goPrevious(); // TODO
+                                } else {
+                                    System.out.println("Swipe Right.");
 
-                                // Call function to Scroll Down.
-                                webCtrl.scrollDown(); // TODO
-                            } else {
-                                System.out.println("Swipe Up.");
+                                    // Call function to Go Next
+                                    webCtrl.goNext(); // TODO
+                                }
+                            } else if (yAbs > 0.3) {
+                                if (swipe.direction().getY() < 0) {
+                                    System.out.println("Swipe Down.");
 
-                                // Call function to Scroll Up
-                                webCtrl.scrollUp(); // TODO
+                                    // Call function to Scroll Down.
+                                    webCtrl.scrollDown(); // TODO
+                                } else {
+                                    System.out.println("Swipe Up.");
+
+                                    // Call function to Scroll Up
+                                    webCtrl.scrollUp(); // TODO
+                                }
                             }
                         }
                     }

@@ -107,4 +107,10 @@ public class WebBrowserController implements IWebBrowser {
         System.out.println("Paste selection text.");
     }
 
+    @Override
+    public void closeWebBrowser() {
+        // TODO Auto-generated method stub
+        System.out.println("Close web browser.");
+    }
+
 }

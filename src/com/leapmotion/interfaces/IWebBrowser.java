@@ -13,6 +13,8 @@ public interface IWebBrowser {
 
     public void openNewTab();
 
+    public void closeWebBrowser();
+
     public void scrollUp();
 
     public void scrollDown();
