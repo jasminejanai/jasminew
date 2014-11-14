@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.leapmotion.implement;
+package com.leapmotion.interfaces;
 
 /**
  * @author Le Hong Quan
@@ -9,7 +9,7 @@ package com.leapmotion.implement;
  * @since 13-Nov-2014
  * 
  */
-public interface WebBrowserBehavior {
+public interface IWebBrowser {
 
     public void openNewTab();
 
