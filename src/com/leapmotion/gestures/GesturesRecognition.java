@@ -5,6 +5,7 @@ package com.leapmotion.gestures;
 
 import java.io.IOException;
 
+import com.leapmotion.controller.WebBrowserController;
 import com.leapmotion.leap.CircleGesture;
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Frame;
@@ -20,6 +21,8 @@ import com.leapmotion.leap.SwipeGesture;
  * 
  */
 public class GesturesRecognition extends Listener {
+
+    public WebBrowserController webCtrl = new WebBrowserController();
 
     /**
      * The Controller object is initialized.
@@ -120,11 +123,15 @@ public class GesturesRecognition extends Listener {
                     // Clockwise if angle is less than 90 degrees
                     clockwiseness = "clockwise";
                     System.out.println("Clockwise.");
-                    // Call function to refresh the current page //TODO
+
+                    // Call function to refresh the current page
+                    webCtrl.refreshPage(); //TODO
                 } else {
                     clockwiseness = "counterclockwise";
                     System.out.println("Counterclockwise");
-                    // Call function to open new tab // TODO
+
+                    // Call function to open new tab
+                    webCtrl.openNewTab(); //TODO
                 }
                 break;
 
@@ -152,18 +159,26 @@ public class GesturesRecognition extends Listener {
                     if (xAbs > 0.3) {
                         if (swipe.direction().getX() < 0) {
                             System.out.println("Swipe Left.");
-                            // Call function to Go Previous // TODO
+
+                            // Call function to Go Previous
+                            webCtrl.goPrevious(); //TODO
                         } else {
                             System.out.println("Swipe Right.");
-                            // Call function to Go Next // TODO
+
+                            // Call function to Go Next
+                            webCtrl.goNext(); //TODO
                         }
                     } else if (yAbs > 0.3) {
                         if (swipe.direction().getY() < 0) {
                             System.out.println("Swipe Down.");
-                            // Call function to Scroll Down. //TODO
+
+                            // Call function to Scroll Down.
+                            webCtrl.scrollDown(); //TODO
                         } else {
                             System.out.println("Swipe Up.");
-                            // Call function to Scroll Up //TODO
+
+                            // Call function to Scroll Up
+                            webCtrl.scrollUp(); //TODO
                         }
                     }
 

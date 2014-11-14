@@ -14,7 +14,9 @@ import com.leapmotion.implement.WebBrowserBehavior;
 public class WebBrowserController implements WebBrowserBehavior {
 
     @Override
-    public void OpenNewTab() {
+    public void openNewTab() {
+        System.out.println("Open new tab for web browser.");
+
         String url = "http://www.google.com";
         String os = System.getProperty("os.name").toLowerCase();
         Runtime rt = Runtime.getRuntime();
@@ -52,57 +54,57 @@ public class WebBrowserController implements WebBrowserBehavior {
     }
 
     @Override
-    public void ScrollUp() {
+    public void scrollUp() {
         // TODO Auto-generated method stub
-
+        System.out.println("Scroll Up.");
     }
 
     @Override
-    public void ScrollDown() {
+    public void scrollDown() {
         // TODO Auto-generated method stub
-
+        System.out.println("RScroll Down.");
     }
 
     @Override
-    public void GoPrevious() {
+    public void goPrevious() {
         // TODO Auto-generated method stub
-
+        System.out.println("Go to previous page.");
     }
 
     @Override
-    public void GoNext() {
+    public void goNext() {
         // TODO Auto-generated method stub
-
+        System.out.println("Go to next page.");
     }
 
     @Override
-    public void RefreshPage() {
+    public void refreshPage() {
         // TODO Auto-generated method stub
-
+        System.out.println("Refresh the current web page.");
     }
 
     @Override
-    public void ZoomInPage() {
+    public void zoomInPage() {
         // TODO Auto-generated method stub
-
+        System.out.println("Zoom in current page.");
     }
 
     @Override
-    public void ZoomOutPage() {
+    public void zoomOutPage() {
         // TODO Auto-generated method stub
-
+        System.out.println("Zoom out current page.");
     }
 
     @Override
-    public void CopyTextSelection() {
+    public void copyTextSelection() {
         // TODO Auto-generated method stub
-
+        System.out.println("Copy selection text.");
     }
 
     @Override
-    public void PasteTextSelection() {
+    public void pasteTextSelection() {
         // TODO Auto-generated method stub
-
+        System.out.println("Paste selection text.");
     }
 
 }

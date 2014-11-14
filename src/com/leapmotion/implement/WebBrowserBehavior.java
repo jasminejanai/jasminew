@@ -11,23 +11,23 @@ package com.leapmotion.implement;
  */
 public interface WebBrowserBehavior {
 
-    public void OpenNewTab();
+    public void openNewTab();
 
-    public void ScrollUp();
+    public void scrollUp();
 
-    public void ScrollDown();
+    public void scrollDown();
 
-    public void GoPrevious();
+    public void goPrevious();
 
-    public void GoNext();
+    public void goNext();
 
-    public void RefreshPage();
+    public void refreshPage();
 
-    public void ZoomInPage();
+    public void zoomInPage();
 
-    public void ZoomOutPage();
+    public void zoomOutPage();
 
-    public void CopyTextSelection();
+    public void copyTextSelection();
 
-    public void PasteTextSelection();
+    public void pasteTextSelection();
 }
