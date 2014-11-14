@@ -20,7 +20,7 @@ import com.leapmotion.leap.SwipeGesture;
  * @since 13-Nov-2014
  * 
  */
-public class GesturesRecognition extends Listener {
+public class GesturesHandler extends Listener {
 
     public WebBrowserController webCtrl = new WebBrowserController();
 
@@ -138,11 +138,13 @@ public class GesturesRecognition extends Listener {
             case TYPE_SWIPE:
                 SwipeGesture swipe = new SwipeGesture(gesture);
                 System.out.println("  Swipe id: " + swipe.id()
-                        + ", start_position: " + swipe.startPosition()
-                        + ", swipe_state: " + swipe.state()
-                        + ", current_position: " + swipe.position()
+                      //  + ", start_position: " + swipe.startPosition()
+                      //  + ", swipe_state: " + swipe.state()
+                      //  + ", current_position: " + swipe.position()
                         + ", direction: " + swipe.direction()
-                        + ", speed: " + swipe.speed());
+                        + ", speed: " + swipe.speed()
+                        + ", duration: " + swipe.duration()
+                        + ", swipper" + swipe.pointable());
 
                 switch (gesture.state()) {
                 case STATE_START:
@@ -208,7 +210,7 @@ public class GesturesRecognition extends Listener {
         // TODO Auto-generated method stub
 
         // Create a sample listener and controller
-        GesturesRecognition listener = new GesturesRecognition();
+        GesturesHandler listener = new GesturesHandler();
         Controller controller = new Controller();
 
         // Have the sample listener receive events from the controller

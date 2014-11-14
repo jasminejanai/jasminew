@@ -3,7 +3,7 @@
  */
 package com.leapmotion.controller;
 
-import com.leapmotion.implement.WebBrowserBehavior;
+import com.leapmotion.interfaces.IWebBrowser;
 
 /**
  * @author Johan Gusten
@@ -11,7 +11,7 @@ import com.leapmotion.implement.WebBrowserBehavior;
  * @since 13-Nov-2014
  * 
  */
-public class WebBrowserController implements WebBrowserBehavior {
+public class WebBrowserController implements IWebBrowser {
 
     @Override
     public void openNewTab() {
