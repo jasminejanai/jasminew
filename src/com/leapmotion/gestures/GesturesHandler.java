@@ -100,14 +100,12 @@ public class GesturesHandler extends Listener {
     /**
      * A new Frame of tracking data is available.
      */
-    @SuppressWarnings("unused")
     public void onFrame(Controller controller) {
         // Get the most recent frame and report some basic information
         Frame frame = controller.frame();
         HandList hands = frame.hands();
 
         GestureList gestures = frame.gestures();
-        String clockwiseness;
         float xAbs = 0.0f;
         float yAbs = 0.0f;
         float handSphereRadius = 2 * hands.get(0).sphereRadius();
@@ -124,22 +122,22 @@ public class GesturesHandler extends Listener {
                     // Handle starting circle gesture
                     break;
                 case STATE_UPDATE:
-                    //Handle continuing gestures
+                    // Handle continuing gestures
                     break;
                 case STATE_STOP:
                     /*
-                     * Calculate clock direction using the angle
-                     * between circle normal and pointable
+                     * Calculate clock direction using the angle between circle
+                     * normal and pointable
                      */
                     if (Math.round(handSphereRadius) <= Constants.HAND_SPHERE) {
                         if (circle.pointable().direction().angleTo(circle.normal()) <= Math.PI / 2) {
                             // Clockwise if angle is less than 90 degrees
-                            clockwiseness = "clockwise";
+                            System.out.println("clockwise");
 
                             // Call function to refresh the current page
                             webCtrl.refreshPage(); // TODO
                         } else {
-                            clockwiseness = "counterclockwise";
+                            System.out.println("counterclockwise");
 
                             // Call function to open new tab
                             webCtrl.openNewTab(); // TODO
@@ -159,33 +157,29 @@ public class GesturesHandler extends Listener {
                 float lifeTime = swipe.pointable().timeVisible();
 
                 System.out.println("  Swipe id: " + swipe.id()
-                      //  + ", start_position: " + swipe.startPosition()
-                      //  + ", swipe_state: " + swipe.state()
-                      //  + ", current_position: " + swipe.position()
-                        + ", direction: " + swipe.direction()
-                        + ", speed: " + swipe.speed()
-                        + ", duration: " + swipe.duration());
+                // + ", start_position: " + swipe.startPosition()
+                // + ", swipe_state: " + swipe.state()
+                // + ", current_position: " + swipe.position()
+                        + ", direction: " + swipe.direction() + ", speed: " + swipe.speed() + ", duration: " + swipe.duration());
 
                 switch (gesture.state()) {
                 case STATE_START:
-                    //Handle starting gestures
+                    // Handle starting gestures
                     break;
                 case STATE_UPDATE:
-                    //Handle continuing gestures
+                    // Handle continuing gestures
                     break;
                 case STATE_STOP:
                     // Get absolute movement along the x and y axis
                     xAbs = Math.abs(swipe.direction().getX());
                     yAbs = Math.abs(swipe.direction().getY());
 
-                    System.out.println("time visible: " + lifeTime);
-
                     if (Math.round(handSphereRadius) > Constants.HAND_SPHERE) {
                         if (lifeTime > 0.3) {
                             System.out.println("Waving.");
 
                             // Call function to close web browser
-                            webCtrl.closeWebBrowser(); //TODO
+                            webCtrl.closeWebBrowser(); // TODO
                         } else {
                             if (xAbs > 0.3) {
                                 if (swipe.direction().getX() < 0) {
@@ -216,7 +210,7 @@ public class GesturesHandler extends Listener {
                     }
                     break;
                 default:
-                    //Handle unrecognized states
+                    // Handle unrecognized states
                     break;
                 }
                 break;
