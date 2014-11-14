@@ -11,8 +11,10 @@ import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Gesture;
 import com.leapmotion.leap.GestureList;
+import com.leapmotion.leap.HandList;
 import com.leapmotion.leap.Listener;
 import com.leapmotion.leap.SwipeGesture;
+import com.leapmotion.utilities.Constants;
 
 /**
  * @author Le Hong Quan
@@ -102,11 +104,13 @@ public class GesturesHandler extends Listener {
     public void onFrame(Controller controller) {
         // Get the most recent frame and report some basic information
         Frame frame = controller.frame();
+        HandList hands = frame.hands();
 
         GestureList gestures = frame.gestures();
         String clockwiseness;
         float xAbs = 0.0f;
         float yAbs = 0.0f;
+        float handSphereRadius = 2 * hands.get(0).sphereRadius();
 
         for (int i = 0; i < gestures.count(); i++) {
             Gesture gesture = gestures.get(i);
@@ -115,23 +119,38 @@ public class GesturesHandler extends Listener {
             case TYPE_CIRCLE:
                 CircleGesture circle = new CircleGesture(gesture);
 
-                /*
-                 * Calculate clock direction using the angle
-                 * between circle normal and pointable
-                 */
-                if (circle.pointable().direction().angleTo(circle.normal()) <= Math.PI / 2) {
-                    // Clockwise if angle is less than 90 degrees
-                    clockwiseness = "clockwise";
-                    System.out.println("Clockwise.");
+                switch (circle.state()) {
+                case STATE_START:
+                    // Handle starting circle gesture
+                    break;
+                case STATE_UPDATE:
+                    //Handle continuing gestures
+                    break;
+                case STATE_STOP:
+                    /*
+                     * Calculate clock direction using the angle
+                     * between circle normal and pointable
+                     */
+                    if (Math.round(handSphereRadius) <= Constants.HAND_SPHERE) {
+                        if (circle.pointable().direction().angleTo(circle.normal()) <= Math.PI / 2) {
+                            // Clockwise if angle is less than 90 degrees
+                            clockwiseness = "clockwise";
 
-                    // Call function to refresh the current page
-                    webCtrl.refreshPage(); //TODO
-                } else {
-                    clockwiseness = "counterclockwise";
-                    System.out.println("Counterclockwise");
+                            // Call function to refresh the current page
+                            webCtrl.refreshPage(); // TODO
+                        } else {
+                            clockwiseness = "counterclockwise";
 
-                    // Call function to open new tab
-                    webCtrl.openNewTab(); //TODO
+                            // Call function to open new tab
+                            webCtrl.openNewTab(); // TODO
+                        }
+                    }
+                    break;
+                case STATE_INVALID:
+                    // Handle invalid circle gestures
+                    break;
+                default:
+                    break;
                 }
                 break;
 
@@ -143,8 +162,7 @@ public class GesturesHandler extends Listener {
                       //  + ", current_position: " + swipe.position()
                         + ", direction: " + swipe.direction()
                         + ", speed: " + swipe.speed()
-                        + ", duration: " + swipe.duration()
-                        + ", swipper" + swipe.pointable());
+                        + ", duration: " + swipe.duration());
 
                 switch (gesture.state()) {
                 case STATE_START:
@@ -158,40 +176,39 @@ public class GesturesHandler extends Listener {
                     xAbs = Math.abs(swipe.direction().getX());
                     yAbs = Math.abs(swipe.direction().getY());
 
-                    if (xAbs > 0.3) {
-                        if (swipe.direction().getX() < 0) {
-                            System.out.println("Swipe Left.");
+                    if (Math.round(handSphereRadius) > Constants.HAND_SPHERE) {
+                        if (xAbs > 0.3) {
+                            if (swipe.direction().getX() < 0) {
+                                System.out.println("Swipe Left.");
 
-                            // Call function to Go Previous
-                            webCtrl.goPrevious(); //TODO
-                        } else {
-                            System.out.println("Swipe Right.");
+                                // Call function to Go Previous
+                                webCtrl.goPrevious(); // TODO
+                            } else {
+                                System.out.println("Swipe Right.");
 
-                            // Call function to Go Next
-                            webCtrl.goNext(); //TODO
-                        }
-                    } else if (yAbs > 0.3) {
-                        if (swipe.direction().getY() < 0) {
-                            System.out.println("Swipe Down.");
+                                // Call function to Go Next
+                                webCtrl.goNext(); // TODO
+                            }
+                        } else if (yAbs > 0.3) {
+                            if (swipe.direction().getY() < 0) {
+                                System.out.println("Swipe Down.");
 
-                            // Call function to Scroll Down.
-                            webCtrl.scrollDown(); //TODO
-                        } else {
-                            System.out.println("Swipe Up.");
+                                // Call function to Scroll Down.
+                                webCtrl.scrollDown(); // TODO
+                            } else {
+                                System.out.println("Swipe Up.");
 
-                            // Call function to Scroll Up
-                            webCtrl.scrollUp(); //TODO
+                                // Call function to Scroll Up
+                                webCtrl.scrollUp(); // TODO
+                            }
                         }
                     }
-
                     break;
                 default:
                     //Handle unrecognized states
                     break;
                 }
-
                 break;
-
             default:
                 System.out.println("Unknown gesture type.");
                 break;

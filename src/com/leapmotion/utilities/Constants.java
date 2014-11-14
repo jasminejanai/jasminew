@@ -27,4 +27,6 @@ public class Constants {
 
     public static final String SWIPE_LEFT = "Swipe Left";
     public static final String SWIPE_RIGHT = "Swipe Right";
+
+    public static final int HAND_SPHERE = 300;
 }
