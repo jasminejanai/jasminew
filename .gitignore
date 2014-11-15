@@ -1,1 +1,6 @@
 /build
+
+# Intellij
+.idea/
+*.iml
+*.iws
