@@ -11,8 +11,11 @@ import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Gesture;
 import com.leapmotion.leap.GestureList;
+import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.HandList;
+import com.leapmotion.leap.KeyTapGesture;
 import com.leapmotion.leap.Listener;
+import com.leapmotion.leap.ScreenTapGesture;
 import com.leapmotion.leap.SwipeGesture;
 import com.leapmotion.utilities.Constants;
 
@@ -41,6 +44,7 @@ public class GesturesHandler extends Listener {
         System.out.println("Connected.");
         controller.enableGesture(Gesture.Type.TYPE_SWIPE);
         controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
+        controller.enableGesture(Gesture.Type.TYPE_KEY_TAP);
     }
 
     /**
@@ -110,6 +114,15 @@ public class GesturesHandler extends Listener {
         float yAbs = 0.0f;
         float handSphereRadius = 2 * hands.get(0).sphereRadius();
 
+        for(Hand hand : frame.hands()) {
+            String handType = hand.isLeft() ? "Left hand" : "Right hand";
+            System.out.println("  " + handType + ", id: " + hand.id()
+                    + ", palm position: " + hand.palmPosition());
+
+            System.out.println("hand grabing: " + hand.grabStrength());
+        }
+
+        // Get gestures
         for (int i = 0; i < gestures.count(); i++) {
             Gesture gesture = gestures.get(i);
 
@@ -156,11 +169,14 @@ public class GesturesHandler extends Listener {
                 SwipeGesture swipe = new SwipeGesture(gesture);
                 float lifeTime = swipe.pointable().timeVisible();
 
-                System.out.println("  Swipe id: " + swipe.id()
-                // + ", start_position: " + swipe.startPosition()
-                // + ", swipe_state: " + swipe.state()
-                // + ", current_position: " + swipe.position()
-                        + ", direction: " + swipe.direction() + ", speed: " + swipe.speed() + ", duration: " + swipe.duration());
+                /*System.out.println("  Swipe id: " + swipe.id()
+                        + ", start_position: " + swipe.startPosition()
+                        + ", swipe_state: " + swipe.state()
+                        + ", current_position: " + swipe.position()
+                        + ", direction: " + swipe.direction()
+                        + ", speed: " + swipe.speed()
+                        + ", duration: " + swipe.duration()
+                        + ", lifeTime: " + swipe.pointable().timeVisible());*/
 
                 switch (gesture.state()) {
                 case STATE_START:
@@ -211,6 +227,55 @@ public class GesturesHandler extends Listener {
                     break;
                 default:
                     // Handle unrecognized states
+                    break;
+                }
+                break;
+            case TYPE_SCREEN_TAP:
+                ScreenTapGesture screenTap = new ScreenTapGesture(gesture);
+                System.out.println("  Screen Tap id: " + screenTap.id()
+                           + ", " + screenTap.state()
+                           + ", position: " + screenTap.position()
+                           + ", direction: " + screenTap.direction());
+                switch (screenTap.state()) {
+                case STATE_START:
+                    // Handle starting gestures
+                    break;
+                case STATE_UPDATE:
+                    // Handle continuing gestures
+                    break;
+                case STATE_STOP:
+                    // Handle stop gestures
+                    break;
+                case STATE_INVALID:
+                    // Handle invalid gestures
+                    break;
+
+                default:
+                    break;
+                }
+                break;
+            case TYPE_KEY_TAP:
+                KeyTapGesture keyTap = new KeyTapGesture(gesture);
+                
+                switch (keyTap.state()) {
+                case STATE_START:
+                    // Handle starting gestures
+                    break;
+                case STATE_UPDATE:
+                    // Handle continuing gestures
+                    break;
+                case STATE_STOP:
+                    // Handle stop gestures
+                    System.out.println("  Key Tap id: " + keyTap.id()
+                            + ", " + keyTap.state()
+                            + ", position: " + keyTap.position()
+                            + ", direction: " + keyTap.direction());
+                    break;
+                case STATE_INVALID:
+                    // Handle invalid gestures
+                    break;
+
+                default:
                     break;
                 }
                 break;
