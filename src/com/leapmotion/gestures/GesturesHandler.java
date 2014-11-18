@@ -27,7 +27,7 @@ import com.leapmotion.utilities.Constants;
  */
 public class GesturesHandler extends Listener {
 
-    public WebBrowserController webCtrl = new WebBrowserController();
+    public WebBrowserController webCtrl;
 
     /**
      * The Controller object is initialized.
@@ -294,8 +294,6 @@ public class GesturesHandler extends Listener {
      * @param args
      */
     public static void main(String[] args) {
-        // TODO Auto-generated method stub
-
         // Create a sample listener and controller
         GesturesHandler listener = new GesturesHandler();
         Controller controller = new Controller();
@@ -303,13 +301,13 @@ public class GesturesHandler extends Listener {
         // Have the sample listener receive events from the controller
         controller.addListener(listener);
 
-        // Keep this process running until Enter is pressed
-        System.out.println("Press Enter to quit...");
+        listener.webCtrl = new WebBrowserController();
 
-        try {
-            System.in.read();
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Keep this process running until the user closes the browser
+        while(true) {
+            if(!listener.webCtrl.browserIsOpen()) {
+                break;
+            }
         }
 
         // Remove the sample listener when done

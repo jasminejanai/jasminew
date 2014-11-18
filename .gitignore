@@ -1,1 +1,10 @@
 /build
+
+# Intellij
+.idea/
+*.iml
+*.iws
+out/
+
+# Libs/dependencies
+libs/
