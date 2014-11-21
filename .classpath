@@ -12,5 +12,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/LeapMotion.v2/LeapDeveloperKit_2.1.4+22333_win/LeapSDK/lib/x64"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="D:/#lib/selenium-server-standalone-2.44.0.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

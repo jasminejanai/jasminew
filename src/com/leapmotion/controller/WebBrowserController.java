@@ -3,7 +3,9 @@
  */
 package com.leapmotion.controller;
 
-import com.leapmotion.interfaces.IWebBrowser;
+import java.io.File;
+import java.util.Scanner;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -12,8 +14,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 
-import java.io.File;
-import java.util.Scanner;
+import com.leapmotion.interfaces.IWebBrowser;
+import com.leapmotion.utilities.Common;
 
 /**
  * @author Johan Gustafsson
@@ -23,32 +25,48 @@ import java.util.Scanner;
  */
 public class WebBrowserController implements IWebBrowser {
 
+    public Common cm = new Common();
     private WebDriver driver;
     private JavascriptExecutor jse;
+    private boolean wantsToQuit;
 
     public WebBrowserController() {
-        String os = System.getProperty("os.name").toLowerCase();
+        wantsToQuit = false;
 
-        if (os.contains("win")) {
+        if (cm.isWindows()) {
             driver = getWindowsBrowserDriver();
 
-            //Do a "fancy" wait loop so we are sure there is a window to maximize before trying to.
-            while(driver.getWindowHandles().isEmpty()) {}
+            // Do a "fancy" wait loop so we are sure there is a window to
+            // maximize before trying to.
+            while (driver.getWindowHandles().isEmpty()) {
+            }
             driver.manage().window().maximize();
+            // TODO: Remove test code
+            driver.navigate().to("http://www.bbc.com/");
+            // driver.navigate().back();
         }
 
-        //If there is a driver, cast it and save it for javascript execution.
-        if(driver != null) {
-            jse = (JavascriptExecutor)driver;
+        // If there is a driver, cast it and save it for javascript execution.
+        if (driver != null) {
+            jse = (JavascriptExecutor) driver;
         }
     }
 
+    /**
+     * Note: This does not work, just open new window. Refer:
+     * GestureHandler.java.
+     */
     @Override
     public void openNewTab() {
         System.out.println("Open a new tab.");
 
-        //TODO: Find a better way to do this, I don't like relying on shortcuts.
-        driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
+        // TODO: Find a better way to do this, I don't like relying on shortcuts.
+        // driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
+        if (driver instanceof ChromeDriver) {
+            jse.executeScript("window.open(\"https://www.google.com\");");
+        } else {
+            driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
+        }
     }
 
     @Override
@@ -56,7 +74,7 @@ public class WebBrowserController implements IWebBrowser {
         // TODO: Do scrolling a bit more responsive to how fast the user swiped.
         System.out.println("Scroll Up.");
 
-        jse.executeScript("window.scrollBy(0,-250)", "");
+        jse.executeScript("window.scrollBy(0,-100)", "");
     }
 
     @Override
@@ -64,7 +82,7 @@ public class WebBrowserController implements IWebBrowser {
         // TODO: Do scrolling a bit more responsive to how fast the user swiped.
         System.out.println("RScroll Down.");
 
-        jse.executeScript("window.scrollBy(0,250)", "");
+        jse.executeScript("window.scrollBy(0,100)", "");
     }
 
     @Override
@@ -88,28 +106,42 @@ public class WebBrowserController implements IWebBrowser {
         driver.navigate().refresh();
     }
 
+    /**
+     * Note: This throws error. Refer: GestureHandler.java.
+     */
     @Override
     public void zoomInPage() {
         System.out.println("Zoom in current page.");
 
-        //TODO: Find a better way to do this, I don't like relying on shortcuts.
-        driver.findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, Keys.ADD));
+        // TODO: Find a better way to do this, I don't like relying on shortcuts.
+        driver.findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
     }
 
+    /**
+     * Note: This throws error. Refer: GestureHandler.java.
+     */
     @Override
     public void zoomOutPage() {
         System.out.println("Zoom out current page.");
 
-        //TODO: Find a better way to do this, I don't like relying on shortcuts.
-        driver.findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
+        // TODO: Find a better way to do this, I don't like relying on shortcuts.
+        driver.findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, Keys.ADD));
     }
 
+    /**
+     * Note: Pending
+     * 
+     * @return
+     */
     @Override
     public void copyTextSelection() {
         // TODO Auto-generated method stub
         System.out.println("Copy selection text.");
     }
 
+    /**
+     * Note: Pending.
+     */
     @Override
     public void pasteTextSelection() {
         // TODO Auto-generated method stub
@@ -120,41 +152,41 @@ public class WebBrowserController implements IWebBrowser {
     public void closeWebBrowser() {
         System.out.println("Close web browser.");
 
-        driver.close();
+        wantsToQuit = true;
+        driver.quit();
     }
 
     /*
      * Returns a new WebDriver of the default browser on a Windows machine.
      */
     private WebDriver getWindowsBrowserDriver() {
-        try
-        {
+        try {
             // Get registry entry containing browser information
             Process process = Runtime.getRuntime().exec("REG QUERY HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\http\\UserChoice");
             Scanner kb = new Scanner(process.getInputStream());
-            while (kb.hasNextLine())
-            {
-                String regOutput = kb.nextLine();
-                if(regOutput.contains("ProgId")) {
-                    String browserName = regOutput.substring(regOutput.lastIndexOf(" ")+1);
+            while (kb.hasNextLine()) {
+                String regOutput = kb.nextLine().toLowerCase();
+                if (regOutput.contains("progid")) {
+                    System.out.println("regOutput: " + regOutput);
+                    String browserName = regOutput.substring(regOutput.lastIndexOf(" ") + 1);
                     browserName = browserName.toLowerCase();
 
-                    //Find what browser is set to default and create a new driver for that browser for further use.
-                    if(browserName.contains("ie")) {
+                    // Find what browser is set to default and create a new
+                    // driver for that browser for further use.
+                    if (browserName.contains("ie")) {
                         kb.close();
                         File driverFile = new File("libs/IEDriverServer.exe");
                         System.setProperty("webdriver.ie.driver", driverFile.getAbsolutePath());
                         System.out.println("InternetExplorer should start");
                         return new InternetExplorerDriver();
-                    }
-                    else if(browserName.contains("chrome")) {
+                    } else if (browserName.contains("chrome")) {
+                        System.out.println("browserName: " + browserName);
                         kb.close();
                         File driverFile = new File("libs/chromedriver.exe");
                         System.setProperty("webdriver.chrome.driver", driverFile.getAbsolutePath());
                         System.out.println("Chrome should start");
                         return new ChromeDriver();
-                    }
-                    else if(browserName.contains("firefox")) {
+                    } else if (browserName.contains("firefox")) {
                         kb.close();
                         System.out.println("Firefox should start");
                         return new FirefoxDriver();
@@ -188,9 +220,10 @@ public class WebBrowserController implements IWebBrowser {
     }
 
     public boolean browserIsOpen() {
-        //If there is a window handle attached to the driver, it means the browser is still open.
-        if(driver.getWindowHandles().isEmpty()) {
-            killController();
+        // If there is a window handle attached to the driver, it means the
+        // browser is still open.
+        if (wantsToQuit) {
+            // killController();
             return false;
         }
         return true;
