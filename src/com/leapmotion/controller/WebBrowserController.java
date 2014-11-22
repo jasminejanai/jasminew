@@ -5,6 +5,7 @@ package com.leapmotion.controller;
 
 import java.io.File;
 import java.util.Scanner;
+import java.util.Stack;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -29,6 +30,7 @@ public class WebBrowserController implements IWebBrowser {
     private WebDriver driver;
     private JavascriptExecutor jse;
     private boolean wantsToQuit;
+    private Stack<String> previousWindowHandles;
 
     public WebBrowserController() {
         wantsToQuit = false;
@@ -40,6 +42,7 @@ public class WebBrowserController implements IWebBrowser {
             // maximize before trying to.
             while (driver.getWindowHandles().isEmpty()) {
             }
+            previousWindowHandles = new Stack<String>();
             driver.manage().window().maximize();
             // TODO: Remove test code
             driver.navigate().to("http://www.bbc.com/");
@@ -61,11 +64,19 @@ public class WebBrowserController implements IWebBrowser {
         System.out.println("Open a new tab.");
 
         // TODO: Find a better way to do this, I don't like relying on shortcuts.
-        // driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
+
+        //Store previous window handle so we cannot return to that once we are done.
+        previousWindowHandles.push(driver.getWindowHandle());
+
         if (driver instanceof ChromeDriver) {
             jse.executeScript("window.open(\"https://www.google.com\");");
         } else {
             driver.findElement(By.cssSelector("body")).sendKeys(Keys.CONTROL + "t");
+        }
+
+        // Switch to last(new) window handle.
+        for (String winHandle : driver.getWindowHandles()) {
+            driver.switchTo().window(winHandle);
         }
     }
 
