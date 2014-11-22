@@ -34,11 +34,11 @@ public class GesturesHandler extends Listener {
     public Common cm = new Common();
     public int counter = 0;
     public int timer = 0;
+    public int handIdZooming = 0;
+    public int handIdPausing = 0;
     public boolean isTrackingStarted = false;
     public boolean isFinished = false;
     public boolean isZooming = true;
-    public int handIdZooming = 0;
-    public int handIdPausing = 0;
     public HashMap<String, String> handMap = new HashMap<>();
     public ArrayList<Float> tempX = new ArrayList<Float>();
     public ArrayList<Float> tempY = new ArrayList<Float>();
