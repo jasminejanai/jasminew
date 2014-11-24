@@ -10,11 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.leapmotion.controller.WebBrowserController;
-import com.leapmotion.leap.CircleGesture;
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Frame;
 import com.leapmotion.leap.Gesture;
-import com.leapmotion.leap.Gesture.State;
 import com.leapmotion.leap.GestureList;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.HandList;
@@ -39,6 +37,8 @@ public class GesturesHandler extends Listener {
     public boolean isTrackingStarted = false;
     public boolean isFinished = false;
     public boolean isZooming = true;
+    public boolean isCrossed = false;
+    public boolean isReleased = false;
     public HashMap<String, String> handMap = new HashMap<>();
     public ArrayList<Float> tempX = new ArrayList<Float>();
     public ArrayList<Float> tempY = new ArrayList<Float>();
@@ -124,7 +124,7 @@ public class GesturesHandler extends Listener {
         HandList hands = frame.hands();
         GestureList gestures = frame.gestures();
 
-        float handSphereRadius = 2 * hands.get(0).sphereRadius();
+        //float handSphereRadius = 2 * hands.get(0).sphereRadius();
 
         handMap.put("handId", String.valueOf(0));
         handMap.put("xAxis", String.valueOf(0.0f));
@@ -145,131 +145,145 @@ public class GesturesHandler extends Listener {
                 if (isTrackingStarted) {
                     float translationIntentFactor = hand.translationProbability(frame);
                     float minimumDistance = hand.palmPosition().distanceTo(Vector.zero());
-                    System.out.println("translationIntentFactor: " + translationIntentFactor);
-                    System.out.println("minimumHeight: " + minimumDistance);
+                    //System.out.println("minimumHeight: " + minimumDistance);
                     System.out.println("");
 
                     // This makes sure the hand is moving
                     if (isMoving(translationIntentFactor)) {
+                        System.out.println("translationIntentFactor: " + translationIntentFactor);
 
-                        // Put hand information into a map to compare
-                        while (hand.id() != Integer.parseInt(handMap.get("handId"))) {
-                            handMap.put("handId", String.valueOf(hand.id()));
-                            handMap.put("xAxis", String.valueOf(hand.palmPosition().getX()));
-                            handMap.put("yAxis", String.valueOf(hand.palmPosition().getY()));
-                            handMap.put("zAxis", String.valueOf(hand.palmPosition().getZ()));
-                        }
-                        tempX.add(Float.parseFloat(handMap.get("xAxis")));
-                        tempY.add(Float.parseFloat(handMap.get("yAxis")));
-                        tempZ.add(Float.parseFloat(handMap.get("zAxis")));
+                        // Two hands
+                        if (frame.hands().count() > 1) {
+                            Hand hand1 = frame.hands().get(0);
+                            Vector normal1 = hand1.palmNormal();
+                            Hand hand2 = frame.hands().get(1);
+                            Vector normal2 = hand2.palmNormal();
+                            System.out.println("normal1.roll(): " + normal1.roll());
+                            System.out.println("normal2.roll(): " + normal2.roll());
 
-                        float _latestX = 0f;
-                        float _prevX = 0f;
-                        float _latestY = 0f;
-                        float _prevY = 0f;
-                        float _latestZ = 0f;
-                        float _prevZ = 0f;
-                        float zSubtract = 0f;
-                        float ySubtract = 0f;
+                            if ((Math.abs(normal1.roll()) < 5) && (Math.abs(normal2.roll()) < 5)) {
+                                webCtrl.refreshPage();
+                            }
+                        } else {
+                            // Put hand information into a map to compare
+                            while (hand.id() != Integer.parseInt(handMap.get("handId"))) {
+                                handMap.put("handId", String.valueOf(hand.id()));
+                                handMap.put("xAxis", String.valueOf(hand.palmPosition().getX()));
+                                handMap.put("yAxis", String.valueOf(hand.palmPosition().getY()));
+                                handMap.put("zAxis", String.valueOf(hand.palmPosition().getZ()));
+                            }
+                            tempX.add(Float.parseFloat(handMap.get("xAxis")));
+                            tempY.add(Float.parseFloat(handMap.get("yAxis")));
+                            tempZ.add(Float.parseFloat(handMap.get("zAxis")));
 
-                        try {
-                            _latestX = tempX.get(tempX.size() - 1);
-                            _prevX = tempX.get(tempX.size() - 2);
-                            _latestY = tempY.get(tempY.size() - 1);
-                            _prevY = tempY.get(tempY.size() - 2);
-                            _latestZ = tempZ.get(tempZ.size() - 1);
-                            _prevZ = tempZ.get(tempZ.size() - 2);
+                            float _latestX = 0f;
+                            float _prevX = 0f;
+                            float _latestY = 0f;
+                            float _prevY = 0f;
+                            float _latestZ = 0f;
+                            float _prevZ = 0f;
+                            float zSubtract = 0f;
+                            float ySubtract = 0f;
 
-                            int xRetval = Float.compare(_prevX, _latestX);
-                            int yRetval = Float.compare(_prevY, _latestY);
-                            int zRetval = Float.compare(_prevZ, _latestZ);
+                            try {
+                                _latestX = tempX.get(tempX.size() - 1);
+                                _prevX = tempX.get(tempX.size() - 2);
+                                _latestY = tempY.get(tempY.size() - 1);
+                                _prevY = tempY.get(tempY.size() - 2);
+                                _latestZ = tempZ.get(tempZ.size() - 1);
+                                _prevZ = tempZ.get(tempZ.size() - 2);
 
-                            /*
-                             * If subtraction between current position and the previous one
-                             * is larger than 2, allows to zoom.
-                             */
-                            zSubtract = Math.abs((_latestZ - _prevZ));
+                                int xRetval = Float.compare(_prevX, _latestX);
+                                int yRetval = Float.compare(_prevY, _latestY);
+                                int zRetval = Float.compare(_prevZ, _latestZ);
 
-                            // Calculate the average hand's movement along y and x axis
-                            int sumY = Math.abs(Math.round(cm.average(tempY)));
-                            int sumX = Math.abs(Math.round(cm.average(tempX)));
-
-                            /*
-                             * If distance between user's hand and vector zero
-                             * of Leap devices is larger than 150, then allows to
-                             * zoom, whereas, swipe.
-                             */
-                            if (minimumDistance > 150.0f) {
-                                float wristAngle = (float) Math.toDegrees(hand.wristPosition().angleTo(Vector.xAxis()));
-                                System.out.println("angle: " + Math.round(wristAngle));
-
-                                /*
-                                 * If the angle between the wrist and x-axis is
-                                 * between 90 and 100, then "Wave", whereas, that is
-                                 * "Zooming".
-                                 */
-                                if (Math.round(wristAngle) > 90 && Math.round(wristAngle) < 100) {
-                                    System.out.println("Waving! Close current tab.");
-                                    webCtrl.closeWebBrowser();
-                                } else {
-                                    System.out.println("Start for Zooming.");
-                                    handIdZooming = hand.id();
-
-                                    if (handIdZooming != handIdPausing) {
-                                        isZooming = true;
-                                    }
-                                    if (zRetval > 0 && zSubtract >= 2) { // prev > latest
-                                        System.out.println("Down. Zoom in.");
-                                        if (isZooming) {
-                                            timer = 0;
-                                            zoomIn();
-                                        }
-                                    } else if (zRetval < 0 && zSubtract >= 2) { // prev < latest
-                                        System.out.println("Up. Zoom out.");
-                                        if (isZooming) {
-                                            timer = 0;
-                                            zoomOut();
-                                            handIdZooming = hand.id();
-                                        }
-                                    }
-                                }
-                            } else {
-                                System.out.println("Swipe Left and Right!");
                                 /*
                                  * If subtraction between current position and the previous one
-                                 * is larger than 2, allows to scroll.
+                                 * is larger than 2, allows to zoom.
                                  */
-                                ySubtract = Math.abs((_latestY - _prevY));
+                                zSubtract = Math.abs((_latestZ - _prevZ));
 
-                                // Horizontal swiping
-                                if (sumX > sumY) {
-                                    if (xRetval > 0) { // prev > latest
-                                        System.out.println("Left. Go Previous.");
-                                        webCtrl.goPrevious();
-                                    } else if (xRetval < 0) { // prev < latest
-                                        System.out.println("Right. Go Next.");
-                                        webCtrl.goNext();
+                                // Calculate the average hand's movement along y and x axis
+                                int sumY = Math.abs(Math.round(cm.average(tempY)));
+                                int sumX = Math.abs(Math.round(cm.average(tempX)));
+
+                                /*
+                                 * If distance between user's hand and vector zero
+                                 * of Leap devices is larger than 150, then allows to
+                                 * zoom, whereas, swipe.
+                                 */
+                                if (minimumDistance > 150.0f) {
+                                    float wristAngle = (float) Math.toDegrees(hand.wristPosition().angleTo(Vector.xAxis()));
+                                    System.out.println("angle: " + Math.round(wristAngle));
+
+                                    /*
+                                     * If the angle between the wrist and x-axis is
+                                     * between 90 and 100, then "Wave", whereas, that is
+                                     * "Zooming".
+                                     */
+                                    if (Math.round(wristAngle) > 90 && Math.round(wristAngle) < 100) {
+                                        System.out.println("Waving! Close current tab.");
+                                        webCtrl.closeWebBrowser();
+                                    } else {
+                                        System.out.println("Start for Zooming.");
+                                        handIdZooming = hand.id();
+
+                                        if (handIdZooming != handIdPausing) {
+                                            isZooming = true;
+                                        }
+                                        if (zRetval > 0 && zSubtract >= 2) { // prev > latest
+                                            System.out.println("Down. Zoom in.");
+                                            if (isZooming) {
+                                                timer = 0;
+                                                zoomIn();
+                                            }
+                                        } else if (zRetval < 0 && zSubtract >= 2) { // prev < latest
+                                            System.out.println("Up. Zoom out.");
+                                            if (isZooming) {
+                                                timer = 0;
+                                                zoomOut();
+                                                handIdZooming = hand.id();
+                                            }
+                                        }
                                     }
                                 } else {
-                                    // Vertical swiping.
-                                    if (yRetval > 0 && ySubtract >= 2) {
-                                        System.out.println("Swipe Up. Scroll Up.");
-                                        webCtrl.scrollDown();
-                                    } else if (yRetval < 0 && ySubtract >= 2) {
-                                        System.out.println("Swipe Down. Srcoll Down.");
-                                        webCtrl.scrollUp();
+                                    System.out.println("Swipe Left and Right!");
+                                    /*
+                                     * If subtraction between current position and the previous one
+                                     * is larger than 2, allows to scroll.
+                                     */
+                                    ySubtract = Math.abs((_latestY - _prevY));
+
+                                    // Horizontal swiping
+                                    if (sumX > sumY) {
+                                        if (xRetval > 0) { // prev > latest
+                                            System.out.println("Left. Go Previous.");
+                                            webCtrl.goPrevious();
+                                        } else if (xRetval < 0) { // prev < latest
+                                            System.out.println("Right. Go Next.");
+                                            webCtrl.goNext();
+                                        }
+                                    } else {
+                                        // Vertical swiping.
+                                        if (yRetval > 0 && ySubtract >= 2) {
+                                            System.out.println("Swipe Up. Scroll Up.");
+                                            webCtrl.scrollDown();
+                                        } else if (yRetval < 0 && ySubtract >= 2) {
+                                            System.out.println("Swipe Down. Srcoll Down.");
+                                            webCtrl.scrollUp();
+                                        }
                                     }
                                 }
-                            }
 
-                            // Force system to clear array list
-                            tempX.clear();
-                            tempY.clear();
-                            System.gc();
-                        } catch (ArrayIndexOutOfBoundsException ex) {
-                            ex.getMessage();
+                                // Force system to clear array list
+                                tempX.clear();
+                                tempY.clear();
+                                System.gc();
+                            } catch (ArrayIndexOutOfBoundsException ex) {
+                                ex.getMessage();
+                            }
+                            System.out.println("");
                         }
-                        System.out.println("");
                     } else {
                         /*
                          * If user pauses longer than 100 milliseconds, then
@@ -294,23 +308,23 @@ public class GesturesHandler extends Listener {
 
         // Get gestures
         // Note: DO NOT use hand sphere, since user has no fingers.
-        for (int i = 0; i < gestures.count(); i++) {
+        /*for (int i = 0; i < gestures.count(); i++) {
             Gesture gesture = gestures.get(i);
 
             switch (gesture.type()) {
             case TYPE_CIRCLE:
                 CircleGesture circle = new CircleGesture(gesture);
 
-                /*System.out.println("  Circle id: " + circle.id()
+                System.out.println("  Circle id: " + circle.id()
                         + ", " + circle.state()
-                        + ", progress: " + circle.progress());*/
+                        + ", progress: " + circle.progress());
 
                 if (circle.state() == State.STATE_STOP) {
                     System.out.println("circle stop.");
-                    /*
+                    
                      * Calculate clock direction using the angle between circle
                      * normal and pointable.
-                     */
+                     
                     System.out.println("circle-" + Math.round(handSphereRadius));
                   //  if (Math.round(handSphereRadius) <= Constants.HAND_SPHERE) {
                         if (circle.pointable().direction().angleTo(circle.normal()) <= Math.PI / 2) {
@@ -325,7 +339,7 @@ public class GesturesHandler extends Listener {
                 }
                 break;
 
-            /*case TYPE_SWIPE:
+            case TYPE_SWIPE:
                 SwipeGesture swipe = new SwipeGesture(gesture);
                 float lifeTime = swipe.pointable().timeVisible();
 
@@ -369,12 +383,12 @@ public class GesturesHandler extends Listener {
                         }
                     //}
                 }
-                break;*/
+                break;
             default:
                 System.out.println("Unknown gesture type.");
                 break;
             }
-        }
+        }*/
 
         if (!frame.hands().isEmpty() || !gestures.isEmpty()) {
             // TODO
