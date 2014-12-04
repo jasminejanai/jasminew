@@ -46,7 +46,6 @@ public class WebBrowserController implements IWebBrowser {
             driver.manage().window().maximize();
             // TODO: Remove test code
             driver.navigate().to("http://www.bbc.com/");
-            // driver.navigate().back();
         }
 
         // If there is a driver, cast it and save it for javascript execution.
@@ -61,10 +60,7 @@ public class WebBrowserController implements IWebBrowser {
      */
     @Override
     public void openNewTab() {
-        System.out.println("Open a new tab.");
-
         // TODO: Find a better way to do this, I don't like relying on shortcuts.
-
         //Store previous window handle so we cannot return to that once we are done.
         previousWindowHandles.push(driver.getWindowHandle());
 
@@ -83,37 +79,29 @@ public class WebBrowserController implements IWebBrowser {
     @Override
     public void scrollUp() {
         // TODO: Do scrolling a bit more responsive to how fast the user swiped.
-        System.out.println("Scroll Up.");
-
         jse.executeScript("window.scrollBy(0,-100)", "");
     }
 
     @Override
     public void scrollDown() {
         // TODO: Do scrolling a bit more responsive to how fast the user swiped.
-        System.out.println("RScroll Down.");
-
         jse.executeScript("window.scrollBy(0,100)", "");
     }
 
     @Override
     public void goPrevious() {
-        System.out.println("Go to previous page.");
+        //System.out.println("Go to previous page.");
 
         driver.navigate().back();
     }
 
     @Override
     public void goNext() {
-        System.out.println("Go to next page.");
-
         driver.navigate().forward();
     }
 
     @Override
     public void refreshPage() {
-        System.out.println("Refresh the current web page.");
-
         driver.navigate().refresh();
     }
 
@@ -122,8 +110,6 @@ public class WebBrowserController implements IWebBrowser {
      */
     @Override
     public void zoomInPage() {
-        System.out.println("Zoom in current page.");
-
         // TODO: Find a better way to do this, I don't like relying on shortcuts.
         driver.findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
     }
@@ -133,8 +119,6 @@ public class WebBrowserController implements IWebBrowser {
      */
     @Override
     public void zoomOutPage() {
-        System.out.println("Zoom out current page.");
-
         // TODO: Find a better way to do this, I don't like relying on shortcuts.
         driver.findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, Keys.ADD));
     }
@@ -161,8 +145,6 @@ public class WebBrowserController implements IWebBrowser {
 
     @Override
     public void closeWebBrowser() {
-        System.out.println("Close web browser.");
-
         wantsToQuit = true;
         driver.quit();
     }
@@ -178,7 +160,6 @@ public class WebBrowserController implements IWebBrowser {
             while (kb.hasNextLine()) {
                 String regOutput = kb.nextLine().toLowerCase();
                 if (regOutput.contains("progid")) {
-                    System.out.println("regOutput: " + regOutput);
                     String browserName = regOutput.substring(regOutput.lastIndexOf(" ") + 1);
                     browserName = browserName.toLowerCase();
 
