@@ -12,7 +12,6 @@ import java.util.HashMap;
 import com.leapmotion.controller.WebBrowserController;
 import com.leapmotion.leap.Controller;
 import com.leapmotion.leap.Frame;
-import com.leapmotion.leap.Gesture;
 import com.leapmotion.leap.GestureList;
 import com.leapmotion.leap.Hand;
 import com.leapmotion.leap.HandList;
@@ -40,7 +39,7 @@ public class GesturesHandler extends Listener {
     public int handIdGoBack = 0;
     public int handIdGoNext = 0;
     public float cur_x = 0, cur_y = 0;
-    public float zLeftHandStart = 0.0f;
+    public Vector handStartToClose = null;
     public float zHandStartGoPrev = 0.0f;
     public boolean isTrackingStarted = false;
     public boolean isFinished = false;
@@ -85,8 +84,6 @@ public class GesturesHandler extends Listener {
      */
     public void onConnect(Controller controller) {
         System.out.println("Connected.");
-        controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
-
     }
 
     /**
@@ -219,14 +216,20 @@ public class GesturesHandler extends Listener {
                              * zoom, whereas, swipe.
                              */
                             if (minimumDistance > 250.0f) {
-                                System.out.println("Start for Zooming.");
+                                System.out.println("TEST.");
+
+                                if (checkSwipe(tempX, tempY) == 3) {
+                                    isSwipe = true;
+                                    handStartToClose = hand.palmPosition();
+                                }
+
                                 handIdZooming = hand.id();
                                 if (handIdZooming != handIdPausing) {
                                     isZooming = true;
                                 }
                                 switch (checkZoom(1, tempZ, isZooming)) {
                                 case 0:
-                                    System.out.println("Cannot recognize zooming.");
+                                    // TODO
                                     break;
                                 case 1:
                                     System.out.println("Down. Zoom in.");
@@ -245,11 +248,10 @@ public class GesturesHandler extends Listener {
                             } else {
                                 switch (checkSwipe(tempX, tempY)) {
                                 case 0:
-                                    System.out.println("Cannot recognize Swiping.");
+                                    // TODO
                                     break;
                                 case 1:
                                     if (isContinueGoBack) {
-                                        System.out.println("This is the first time to go back.");
                                         System.out.println("Left. Go Previous.");
                                         webCtrl.goPrevious();
                                         isGoBack = true;
@@ -258,7 +260,6 @@ public class GesturesHandler extends Listener {
                                     break;
                                 case 2:
                                     if (isContinueGoNext) {
-                                        System.out.println("This is the first time to go next.");
                                         System.out.println("Right. Go Next.");
                                         webCtrl.goNext();
                                         isGoNext = true;
@@ -361,13 +362,6 @@ public class GesturesHandler extends Listener {
                                     webCtrl.refreshPage();
                                 }
                             }
-                        } else if (minimumDistance_L > 250.0f && minimumDistance_R > 250.0f) {
-                            if (isMoving(translationIntentFactor_L) && isMoving(translationIntentFactor_R)) {
-                                if (checkSwipe(tempXR, tempYR) == 3 && checkSwipe(tempXL, tempYL) == 3) {
-                                    isSwipe = true;
-                                    zLeftHandStart = leftHand.palmPosition().getZ();
-                                }
-                            }
                         }
                         break;
                     default:
@@ -381,13 +375,13 @@ public class GesturesHandler extends Listener {
             counter = 0;
 
             /*
-             * If the distance between left-hand position when user starts to
-             * swipe and the position when user finishes swiping is larger /
-             * equals 10, then allows to close the web page.
+             * Whenever user swipe his hand down and the distance between
+             * his hand and leap device is smaller than 300, then
+             * close the web browser.
              */
             if (isSwipe) {
-                if (Math.abs((zLeftHandStart - leftHand.palmPosition().getZ())) >= 10.0f) {
-                    System.out.println("Right-hand and left-hand are moving down. Close the web.");
+                if (handStartToClose.distanceTo(hand.palmPosition()) >= 200.0f && handStartToClose.distanceTo(hand.palmPosition()) <= 300.0f) {
+                    System.out.println("Close browser.");
                     webCtrl.closeWebBrowser();
                 }
             }
@@ -478,6 +472,7 @@ public class GesturesHandler extends Listener {
             int sumY = Math.abs(Math.round(cm.average(arrY)));
             System.out.println("sumX: " + sumX);
             System.out.println("sumX: " + sumY);
+            System.out.println("yRetval: " + yRetval);
 
             /*
              * If subtraction between current position and the previous one is
@@ -527,24 +522,26 @@ public class GesturesHandler extends Listener {
             int retval = Float.compare(_prev, _latest);
             /*
              * If subtraction between current position and the previous one is
-             * larger than 2, allows to zoom.
+             * larger than 3, allows to zoom.
              */
             sub = Math.abs((_latest - _prev));
+
             if (n == 1) {
-                if (retval > 0 && sub >= 2 && isZoom) {
+                if (retval > 0 && sub >= 3.0f && isZoom) {
                     return 1;
-                } else if (retval < 0 && sub >= 2 && isZoom) {
+                } else if (retval < 0 && sub >= 3.0f && isZoom) {
                     return 2;
                 }
                 arr.clear();
                 System.gc();
-            } else if (n == 2) {
+            }
+            /*else if (n == 2) {
                 if (retval > 0 && sub >= 2 && !isZoom) {
                     return 3;
                 } else if (retval < 0 && sub >= 2 && !isZoom) {
                     return 4;
                 }
-            }
+            }*/
 
         } catch (ArrayIndexOutOfBoundsException e) {
             e.getMessage();
