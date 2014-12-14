@@ -3,7 +3,12 @@
  */
 package com.leapmotion.controller;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -18,6 +23,9 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import com.leapmotion.interfaces.IWebBrowser;
 import com.leapmotion.utilities.Common;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+
 /**
  * @author Johan Gustafsson
  * @version 1.0
@@ -31,9 +39,11 @@ public class WebBrowserController implements IWebBrowser {
     private JavascriptExecutor jse;
     private boolean wantsToQuit;
     private Stack<String> previousWindowHandles;
+    private InvisibleFrame visFeedbackFrame;
 
     public WebBrowserController() {
         wantsToQuit = false;
+        visFeedbackFrame = new InvisibleFrame();
 
         if (cm.isWindows()) {
             driver = getWindowsBrowserDriver();
@@ -92,16 +102,19 @@ public class WebBrowserController implements IWebBrowser {
     public void goPrevious() {
         //System.out.println("Go to previous page.");
 
+        visFeedbackFrame.displayImage("res/swipeLeft.png");
         driver.navigate().back();
     }
 
     @Override
     public void goNext() {
+        visFeedbackFrame.displayImage("res/swipeRight.png");
         driver.navigate().forward();
     }
 
     @Override
     public void refreshPage() {
+        visFeedbackFrame.displayImage("res/refresh.png");
         driver.navigate().refresh();
     }
 
@@ -219,5 +232,110 @@ public class WebBrowserController implements IWebBrowser {
             return false;
         }
         return true;
+    }
+
+    public static class InvisibleFrame extends JFrame {
+
+        private DrawPane drawPanel;
+        private int width;
+        private int height;
+
+        public InvisibleFrame() {
+            super("InvisibleFrame");
+
+            drawPanel = new DrawPane();
+            setContentPane(drawPanel);
+
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            setDefaultLookAndFeelDecorated(false);
+            setUndecorated(true);
+            setAlwaysOnTop(true);
+            setBackground(new Color(0, 0, 0, 0));
+
+            setFrameSize();
+
+            setVisible(true);
+        }
+
+        public void displayImage(BufferedImage image) {
+            setFrameSize();
+            drawPanel.displayImage(image, width, height);
+        }
+
+        public void displayImage(String path) {
+            BufferedImage image = null;
+
+            try {
+                image = ImageIO.read(new File(path));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            setFrameSize();
+            drawPanel.displayImage(image, width, height);
+        }
+
+        private void setFrameSize() {
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            width = (int) screenSize.getWidth();
+            height = (int) screenSize.getHeight();
+            setSize(width, height);
+            setLocationRelativeTo(null);
+        }
+
+        //create a component that you can actually draw on.
+        private static class DrawPane extends JPanel implements ActionListener {
+
+            private float alpha = 0f;
+            private final float DELTA = -0.025f;
+            private final Timer timer = new Timer(10, null);
+            private int width;
+            private int height;
+            private BufferedImage image;
+
+            public DrawPane() {
+                super();
+                image = null;
+                setOpaque(true);
+                timer.setInitialDelay(0);
+                timer.addActionListener(this);
+
+                try {
+                    image = ImageIO.read(new File("res/swipeRight.png"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                width = (int) screenSize.getWidth();
+                height = (int) screenSize.getHeight();
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                alpha += DELTA;
+                if (alpha < 0) {
+                    alpha = 0;
+                    timer.stop();
+                }
+                repaint();
+            }
+
+            public void paintComponent(Graphics g) {
+                //draw on g here e.g.
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setComposite(AlphaComposite.SrcOver.derive(alpha));
+                int relativeHeight = (int) ((float) image.getHeight() / (float) image.getWidth() * width / 2);
+                g2d.drawImage(image, width / 2 - width / 4, height / 2 - relativeHeight / 2, width / 2, relativeHeight, this);
+            }
+
+            public void displayImage(BufferedImage image, int width, int height) {
+                timer.stop();
+                alpha = 1f;
+                this.width = width;
+                this.height = height;
+                this.image = image;
+                timer.restart();
+            }
+        }
     }
 }
