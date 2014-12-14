@@ -42,11 +42,11 @@ public class Common {
      * @return
      */
     public float average(ArrayList<Float> arr) {
-        float sum = 0f;
+        float sum = 0.0f;
         int size = arr.size();
 
         if (arr == null || arr.isEmpty()) {
-            return 0f;
+            return 0.0f;
         } else {
             for (int i = 0; i < size; i++) {
                 sum += arr.get(i);

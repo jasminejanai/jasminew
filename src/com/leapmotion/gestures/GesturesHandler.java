@@ -140,9 +140,6 @@ public class GesturesHandler extends Listener {
         System.out.println("Focus gained");
     }
 
-    /**
-     * A new Frame of tracking data is available.
-     */
     public void onFrame(Controller controller) {
         Frame frame = controller.frame();
         HandList hands = frame.hands();
@@ -216,8 +213,6 @@ public class GesturesHandler extends Listener {
                              * zoom, whereas, swipe.
                              */
                             if (minimumDistance > 250.0f) {
-                                System.out.println("TEST.");
-
                                 if (checkSwipe(tempX, tempY) == 3) {
                                     isSwipe = true;
                                     handStartToClose = hand.palmPosition();
@@ -341,6 +336,8 @@ public class GesturesHandler extends Listener {
                         tempXL.add(Float.parseFloat(leftHandMap.get("xAxis")));
                         tempYL.add(Float.parseFloat(leftHandMap.get("yAxis")));
 
+                        moveMouse(rightHand.palmPosition().getX() * 10 * HORIZONTAL_SCREENS, SCREEN_X - rightHand.palmPosition().getY() * 5 * VERTICAL_SCREENS);
+
                         /*
                          * If holds on left-hand and swipe right-hand to right,
                          * then open new tab, whereas, two hands cross together,
@@ -380,7 +377,9 @@ public class GesturesHandler extends Listener {
              * close the web browser.
              */
             if (isSwipe) {
-                if (handStartToClose.distanceTo(hand.palmPosition()) >= 200.0f && handStartToClose.distanceTo(hand.palmPosition()) <= 300.0f) {
+                System.out.println("test: " + handStartToClose.distanceTo(hand.palmPosition()));
+                if (handStartToClose.distanceTo(hand.palmPosition()) >= 250.0f
+                        && handStartToClose.distanceTo(hand.palmPosition()) <= 300.0f) {
                     System.out.println("Close browser.");
                     webCtrl.closeWebBrowser();
                 }
@@ -453,11 +452,11 @@ public class GesturesHandler extends Listener {
      * @return
      */
     public int checkSwipe(ArrayList<Float> arrX, ArrayList<Float> arrY) {
-        float _latestX = 0f;
-        float _prevX = 0f;
-        float _latestY = 0f;
-        float _prevY = 0f;
-        float subY = 0f;
+        float _latestX = 0.0f;
+        float _prevX = 0.0f;
+        float _latestY = 0.0f;
+        float _prevY = 0.0f;
+        float subY = 0.0f;
 
         try {
             _latestX = arrX.get(arrX.size() - 1);
@@ -641,9 +640,6 @@ public class GesturesHandler extends Listener {
         }
     }
 
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
         GesturesHandler listener = new GesturesHandler();
         Controller controller = new Controller();
@@ -655,7 +651,8 @@ public class GesturesHandler extends Listener {
 
         listener.webCtrl = new WebBrowserController();
 
-        // Keep this process running until the user closes the browser
+        // Keep this process running until Enter is pressed
+        System.out.println("Press Enter to quit...");
         while (true) {
             try {
                 Thread.sleep(10);
