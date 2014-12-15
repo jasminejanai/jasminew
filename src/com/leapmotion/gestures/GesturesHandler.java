@@ -39,13 +39,19 @@ public class GesturesHandler extends Listener {
     public int handIdGoBack = 0;
     public int handIdGoNext = 0;
     public float cur_x = 0, cur_y = 0;
-    public Vector handStartToClose = null;
     public float zHandStartGoPrev = 0.0f;
+    public float initX;
+    public float initY;
+    public float angleLeft;
+    public float angleRight;
+    public float angleUp;
+    public float angleDown;
+    public Vector handStartToClose = null;
     public boolean isTrackingStarted = false;
     public boolean isFinished = false;
     public boolean isZooming = true;
-    public boolean isMoved = false;
     public boolean isSwipe = false;
+    public boolean isMoved = false;
     public boolean isContinueGoBack = true;
     public boolean isContinueGoNext = true;
     public boolean isGoBack = false;
@@ -76,6 +82,8 @@ public class GesturesHandler extends Listener {
      */
     public void onInit(Controller controller) {
         System.out.println("Initialized.");
+        System.out.println("SCREEN_X: " + SCREEN_X);
+        System.out.println("SCREEN_Y: " + SCREEN_Y);
     }
 
     /**
@@ -162,14 +170,22 @@ public class GesturesHandler extends Listener {
                 if (counter == 100) {
                     System.out.println("counter: " + counter);
                     isTrackingStarted = true;
+                    /*initX = hand.palmPosition().getX();
+                    initY = hand.palmPosition().getY();
+                    System.out.println("initX: " + initX);
+                    System.out.println("initY: " + initY);*/
                 }
 
                 if (isTrackingStarted) {
+                    System.out.println("isGoBack: " + isGoBack);
+                    System.out.println("isGoNext: " + isGoNext);
 
                     /*
                      * If handId is create new, allows to goBack.
                      */
                     if (isGoBack) {
+                        System.out.println("handId: " + hand.id());
+                        System.out.println("handIdGoBack: " + handIdGoBack);
                         if (hand.id() == handIdGoBack) {
                             isContinueGoBack = false;
                         } else {
@@ -198,7 +214,7 @@ public class GesturesHandler extends Listener {
                          */
                         if (isMoving(translationIntentFactor)) {
                             float minimumDistance = hand.palmPosition().distanceTo(Vector.zero());
-                            //System.out.println("minimumDistance: " + minimumDistance);
+                            System.out.println("minimumDistance: " + minimumDistance);
 
                             // Push hand information into a map to compare
                             handMap = pushHandInfo(hand);
@@ -241,11 +257,18 @@ public class GesturesHandler extends Listener {
                                     break;
                                 }
                             } else {
+                                //isMoved = true;
+                                /*initX = hand.palmPosition().getX();
+                                initY = hand.palmPosition().getY();*/
+
                                 switch (checkSwipe(tempX, tempY)) {
                                 case 0:
                                     // TODO
                                     break;
                                 case 1:
+                                    System.out.println("isContinueGoBack: " + isContinueGoBack);
+                                    System.out.println("isContinueGoNext: " + isContinueGoNext);
+
                                     if (isContinueGoBack) {
                                         System.out.println("Left. Go Previous.");
                                         webCtrl.goPrevious();
@@ -354,6 +377,7 @@ public class GesturesHandler extends Listener {
                                 }
                             } else if (isMoving(translationIntentFactor_L)
                                     && isMoving(translationIntentFactor_R) && angleBetweenTwoHands < 0.5f) {
+                                System.out.println("distance: " + leftHand.palmPosition().distanceTo(rightHand.palmPosition()));
                                 if (isCrossedHand(normal1.roll(), normal2.roll()) && leftHand.palmPosition().distanceTo(rightHand.palmPosition()) < 100.0f) {
                                     System.out.println("Cross hands. Refresh the page.");
                                     webCtrl.refreshPage();
@@ -377,13 +401,65 @@ public class GesturesHandler extends Listener {
              * close the web browser.
              */
             if (isSwipe) {
-                System.out.println("test: " + handStartToClose.distanceTo(hand.palmPosition()));
+                //System.out.println("test: " + handStartToClose.distanceTo(hand.palmPosition()));
                 if (handStartToClose.distanceTo(hand.palmPosition()) >= 250.0f
                         && handStartToClose.distanceTo(hand.palmPosition()) <= 300.0f) {
                     System.out.println("Close browser.");
                     webCtrl.closeWebBrowser();
                 }
             }
+
+            /*if (isMoved) {
+                 Calculate the angle between hand position and
+                 * basic vector of leap controller
+                 
+                angleLeft = (float) Math.toDegrees(hand.palmPosition().angleTo(Vector.left()));
+                angleRight = (float) Math.toDegrees(hand.palmPosition().angleTo(Vector.right()));
+                angleUp = (float) Math.toDegrees(hand.palmPosition().angleTo(Vector.up()));
+                angleDown = (float) Math.toDegrees(hand.palmPosition().angleTo(Vector.down()));
+                System.out.println("angleLeft: " + angleLeft);
+                System.out.println("angleRight: " + angleRight);
+                System.out.println("angleUp: " + angleUp);
+                System.out.println("angleDown: " + angleDown);
+                System.out.println("");
+
+                // Compare
+                float endX = hand.palmPosition().getX();
+                float endY = hand.palmPosition().getY();
+                float subX = Math.abs(endX - initX);
+                float subY = Math.abs(endY - initY);
+                System.out.println("subX: " + subX);
+                System.out.println("subY: " + subY);
+
+                if (Float.compare(subX, subY) > 0) {
+                    if (Float.compare(endX, initX) < 0 && angleLeft >= 0.0f && angleLeft <= 40.0f) {
+                        //System.out.println("Go Left.");
+                        if (isContinueGoBack) {
+                            System.out.println("Left. Go Previous.");
+                            webCtrl.goPrevious();
+                            isGoBack = true;
+                            handIdGoBack = hand.id();
+                        }
+                    } else if (Float.compare(endX, initX) > 0 && angleRight >= 0.0f && angleRight <= 40.0f) {
+                        //System.out.println("Go Right.");
+                        if (isContinueGoNext) {
+                            System.out.println("Right. Go Next.");
+                            webCtrl.goNext();
+                            isGoNext = true;
+                            handIdGoNext = hand.id();
+                        }
+                    }
+                } else if (Float.compare(subX, subY) < 0) {
+                    if (Float.compare(endY, initY) < 0 && angleDown >= 0.0f && angleDown <= 40.0f) {
+                        System.out.println("Swipe Down. Scroll Down.");
+                        webCtrl.scrollDown();
+                    } else if (Float.compare(endY, initY) > 0 && angleUp >= 0.0f && angleUp <= 40.0f) {
+                        System.out.println("Swipe Up. Srcoll Up.");
+                        webCtrl.scrollUp();
+                    }
+                }
+            }*/
+
         }
 
         if (!frame.hands().isEmpty() || !gestures.isEmpty()) {
@@ -461,17 +537,20 @@ public class GesturesHandler extends Listener {
         try {
             _latestX = arrX.get(arrX.size() - 1);
             _prevX = arrX.get(arrX.size() - 2);
+
             _latestY = arrY.get(arrY.size() - 1);
             _prevY = arrY.get(arrY.size() - 2);
             int xRetval = Float.compare(_prevX, _latestX);
             int yRetval = Float.compare(_prevY, _latestY);
+            System.out.println("xRetval: " + xRetval);
+            System.out.println("yRetval: " + yRetval);
+            System.out.println("");
 
             // Calculate the average hand's movement along y and x axis
             int sumX = Math.abs(Math.round(cm.average(arrX)));
             int sumY = Math.abs(Math.round(cm.average(arrY)));
             System.out.println("sumX: " + sumX);
-            System.out.println("sumX: " + sumY);
-            System.out.println("yRetval: " + yRetval);
+            System.out.println("sumY: " + sumY);
 
             /*
              * If subtraction between current position and the previous one is
